@@ -171,26 +171,29 @@ def send_email_route():
         # Vérifier si un fichier CSV est téléchargé
         file = request.files.get("csv_file")
         if file and file.filename.endswith('.csv'):
+            # Créer le répertoire 'uploads' si nécessaire
+            upload_folder = 'uploads'
+            if not os.path.exists(upload_folder):
+                os.makedirs(upload_folder)
+
             # Sauvegarder le fichier CSV
             filename = secure_filename(file.filename)
-            file_path = os.path.join("uploads", filename)
+            file_path = os.path.join(upload_folder, filename)
             file.save(file_path)
 
             # Lire les emails et noms depuis le fichier CSV
             try:
                 with open(file_path, mode="r", newline="", encoding="utf-8") as csvfile:
-
                     reader = csv.reader(csvfile)
                     next(reader)  # Ignorer l'entête du fichier CSV
 
                     # Envoi des emails de phishing à chaque destinataire
-                    phishing_link = "https://regence-it.onrender.com"  # Lien de phishing
+                    phishing_link = "https://cybersecurit-qx4s.onrender.com"  # Lien de phishing
                     for row in reader:
                         if len(row) >= 2:  # Vérifier qu'il y a au moins un email et un nom
                             recipient_email = row[0].strip()
                             recipient_name = row[1].strip()
-                            send_email(recipient_email, recipient_name)
-
+                            send_email(recipient_email, recipient_name, phishing_link)
 
                     return f"Emails envoyés avec succès à tous les destinataires du fichier CSV."
             except Exception as e:
@@ -201,13 +204,14 @@ def send_email_route():
         recipient_name = request.form.get("recipient_name")
         
         if recipient_email and recipient_name:
-            phishing_link = "https://regence-it.onrender.com"  # Lien de phishing
+            phishing_link = "https://cybersecurit-qx4s.onrender.com"  # Lien de phishing
             send_email(recipient_email, recipient_name, phishing_link)
             return f"Email envoyé à {recipient_name} ({recipient_email}) avec succès !"
 
         return "Erreur : Email ou Nom manquant.", 400
 
     return render_template("send_email.html")  # Page pour envoyer un email
+
 
 
 # Route pour afficher le formulaire de login pour accéder aux statistiques
