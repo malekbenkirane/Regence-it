@@ -1,6 +1,5 @@
 ﻿from flask import Flask, render_template, request, redirect, session, send_file, jsonify
 from flask_sqlalchemy import SQLAlchemy
-import os
 import smtplib
 from email.mime.text import MIMEText
 import matplotlib.pyplot as plt
@@ -9,6 +8,17 @@ import urllib.parse
 from datetime import datetime
 from sqlalchemy import func
 
+
+import os
+# Créer le répertoire 'uploads' s'il n'existe pas
+upload_folder = 'uploads'
+if not os.path.exists(upload_folder):
+    os.makedirs(upload_folder)  # Crée le répertoire
+
+# Sauvegarder le fichier CSV dans ce répertoire
+filename = secure_filename(file.filename)
+file_path = os.path.join(upload_folder, filename)
+file.save(file_path)
 
 app = Flask(__name__)
 app.secret_key = "supersecretkey"
@@ -171,15 +181,20 @@ def send_email_route():
         # Vérifier si un fichier CSV est téléchargé
         file = request.files.get("csv_file")
         if file and file.filename.endswith('.csv'):
+            # Créer le répertoire 'uploads' si nécessaire
+            upload_folder = 'uploads'
+            if not os.path.exists(upload_folder):
+                os.makedirs(upload_folder)  # Crée le dossier si non existant
+
             # Sauvegarder le fichier CSV
             filename = secure_filename(file.filename)
-            file_path = os.path.join("uploads", filename)
-            file.save(file_path)
+            file_path = os.path.join(upload_folder, filename)
 
-            # Lire les emails et noms depuis le fichier CSV
             try:
+                file.save(file_path)  # Sauvegarder le fichier téléchargé dans le dossier 'uploads'
+                
+                # Lire les emails et noms depuis le fichier CSV
                 with open(file_path, mode="r", newline="", encoding="utf-8") as csvfile:
-
                     reader = csv.reader(csvfile)
                     next(reader)  # Ignorer l'entête du fichier CSV
 
@@ -189,8 +204,7 @@ def send_email_route():
                         if len(row) >= 2:  # Vérifier qu'il y a au moins un email et un nom
                             recipient_email = row[0].strip()
                             recipient_name = row[1].strip()
-                            send_email(recipient_email, recipient_name)
-
+                            send_email(recipient_email, recipient_name, phishing_link)
 
                     return f"Emails envoyés avec succès à tous les destinataires du fichier CSV."
             except Exception as e:
