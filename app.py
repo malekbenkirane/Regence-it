@@ -9,21 +9,19 @@ import urllib.parse
 from datetime import datetime
 from sqlalchemy import func
 
-db = SQLAlchemy(app)
-
-# Une fois tes modèles définis :
-with app.app_context():
-    db.create_all()
-
-
 app = Flask(__name__)
 app.secret_key = "supersecretkey"
 
-# Configuration de la base de données SQLite
+# Configuration de la base de données
 app.config["SQLALCHEMY_DATABASE_URI"] = "postgresql://reg:K5h6tdzcBpavK1CH0yd4oOi5YiKrYMbj@dpg-cvsh20ur433s73c7e470-a.oregon-postgres.render.com/phishingdb_wh58"
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
 db = SQLAlchemy(app)
+
+# Créer les tables après l'initialisation de l'application
+with app.app_context():
+    db.create_all()
+
 
 # Modèle pour stocker les interactions des utilisateurs
 class Interaction(db.Model):
