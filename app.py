@@ -128,7 +128,9 @@ def reset_stats():
         db.session.rollback()
         return {"success": False, "error": str(e)}, 500
 
-
+@app.route("/test_message")
+def test_message():
+    return render_template("test_message.html")
 
 @app.route("/capture", methods=["POST"])
 def capture():
@@ -142,7 +144,9 @@ def capture():
             db.session.add(Interaction(email=email, event_type="formulaire soumis"))
             db.session.commit()
 
-    return redirect("https://outlook.com")
+    # Rediriger vers la page de message de test de phishing
+    return redirect("/test_message")
+
 
 
 @app.route("/")
